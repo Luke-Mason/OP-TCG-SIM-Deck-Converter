@@ -51,7 +51,6 @@ main {
   height: 100vh;
 }
 button {
-  border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
   font-size: 1em;
@@ -61,12 +60,24 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
+.mdc-tab--active {
+  background-color: #72c4fa;
+  border-radius: 0;
+  border-bottom: 2px solid;
+}
+.mdc-tab__content {
+  align-items: center;
+  gap: 0.5rem;
+  display: flex;
+}
+
 button:hover {
   border-color: #646cff;
 }
 button:focus,
+button:active,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: none;
 }
 
 @media (prefers-color-scheme: light) {
@@ -78,6 +89,6 @@ button:focus-visible {
     color: #747bff;
   }
   button {
-    background-color: #f9f9f9;
+    background-color: #dfdfdf;
   }
 }
