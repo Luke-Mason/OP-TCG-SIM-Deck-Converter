@@ -2,7 +2,7 @@
     let error = '';
     let loading = false
     let conversionStatus = 'content_paste_search'
-    let oldConvertedList = '';
+    let convertedList = '';
     const countElements = (arr: any[]): { [key: string]: number } => {
         const counts: { [key: string]: number } = {};
 
@@ -38,7 +38,14 @@
     }
 
     const convert = (rawDeckListStr) => {
-        console.log('Converting...');
+
+        // Ignore output as input
+        if (convertedList.replaceAll('\n', '').replaceAll(' ', '') === rawDeckListStr.replaceAll('\n', '').replaceAll(' ', '')) {
+            loading = false;
+            return;
+        }
+
+        console.log('Converting...', rawDeckListStr);
         let list = '';
         error = '';
 
@@ -52,35 +59,34 @@
             list = executeOPTDStrategy(rawDeckListStr);
         }
 
+
         // Verify
         if (list.split('\n').length < 2) {
             error = `Conversion did not look correct, this was the input: '${rawDeckListStr}', and this is the output: '${list}'`;
             throw new Error(error);
         }
 
-        return list;
-    }
-
-    const handleConvert = (data: string) => {
-        const convertedList = convert(data)
-        console.log('Old data:', oldConvertedList);
-
-        console.log(convertedList.toLowerCase().replace(/\s+/g, "") === oldConvertedList.toLowerCase().replace(/\s+/g, ""))
-        if (convertedList.toLowerCase().replace(/\s+/g, "") === oldConvertedList.toLowerCase().replace(/\s+/g, "")) {
-            // Ignore, clicked button again, same result.
-            loading = false;
-            return;
-        }
-        oldConvertedList = convertedList;
+        convertedList = list;
     }
 
     const copyListToClipboard = async () => {
         try {
-            await navigator.clipboard.writeText(oldConvertedList);
-            console.log('Text copied to clipboard:', oldConvertedList);
+            await navigator.clipboard.writeText(convertedList);
+            console.log('Text copied to clipboard:', convertedList);
         } catch (e) {
-            console.error('Failed to copy text:', e);
-            error = 'Failed to copy text:' + e;
+            if (e.toString() === 'NotAllowedError: Document is not focused.') {
+                try {
+                    await navigator.clipboard.writeText(convertedList);
+                    console.log('Text copied to clipboard:', convertedList);
+                } catch (e) {
+                    console.error('Failed to copy text:', e);
+                    error = 'Failed to copy text:' + e;
+                }
+                return;
+            } else {
+                console.error('Failed to copy text:', e);
+                error = 'Failed to copy text:' + e;
+            }
         }
     }
 
@@ -92,7 +98,7 @@
             const clipboardData = await navigator.clipboard.readText();
             console.log('Clipboard data:', clipboardData);
 
-            handleConvert(clipboardData);
+            convert(clipboardData);
 
             await copyListToClipboard();
         } catch (e) {
@@ -101,7 +107,7 @@
         }
         loading = false;
 
-        if (!loading && !error && oldConvertedList) {
+        if (!loading && !error && convertedList) {
             conversionStatus = 'done';
         } else if (!loading && error) {
             conversionStatus = 'error';
@@ -150,31 +156,26 @@
                     <Icon class="material-icons">{conversionStatus}</Icon>
                 {:else}
                     <div style="display: flex; justify-content: center">
-                        <CircularProgress
-                                class="my-four-colors"
-                                style="height: 32px; width: 32px;"
-                                indeterminate
-                                fourColor
-                        />
+                        Loading...
                     </div>
                 {/if}
-                {#if oldConvertedList.length > 0}
+                {#if convertedList.length > 0}
                     <div>
                         <h5>Output</h5>
-                        <div class="result">{oldConvertedList}</div>
+                        <div class="result">{convertedList}</div>
                     </div>
                 {/if}
             </div>
         {:else if active.label === 'Manual'}
             <div class="manual-content-wrapper">
-                <textarea class="textarea" on:input={(e) => handleConvert(e.target.value)}></textarea>
+                <textarea class="textarea" on:input={(e) => convert(e.target.value)}></textarea>
                 <div>
                     to
                 </div>
-                {#if oldConvertedList.length > 0}
+                {#if convertedList.length > 0}
                     <div>
                         <h5>Output</h5>
-                        <div class="result">{oldConvertedList}</div>
+                        <div class="result">{convertedList}</div>
                     </div>
                     <button on:click={async () => await copyListToClipboard()}>Copy to Clipboard</button>
                 {/if}
