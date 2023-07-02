@@ -24,7 +24,7 @@
 
 <main>
   <h1>One Piece Trading Card Game Deck List Converter</h1>
-  <div class="instructions">Get a deck list you want for the sim from <a href="https://onepiecetopdecks.com/deck-list/">here</a> by copying the deck list at the bottom of the page of the deck you want converted</div>
+  <div class="instructions">Get a deck list you want for the sim from <a target="_blank" href="https://onepiecetopdecks.com/deck-list/">here</a> by copying the deck list at the bottom of the page of the deck you want converted</div>
   <h3>
     Convert Deck list into OP-TCG-SIM format
   </h3>
